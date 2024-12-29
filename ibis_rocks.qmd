@@ -1,0 +1,52 @@
+---
+title: "Ibis Rocks Python"
+format: html
+toc: true
+echo: false
+jupyter: python3
+---
+```{python}
+import ibis
+from ibis import _
+import seaborn as sns
+import matplotlib.pyplot as plt
+```
+## Read Data
+
+```{python}
+db = ibis.read_csv("avocadoboard.csv").rename("snake_case")
+db.head()
+```
+## Calcuate Mean and Median Price by Day
+
+```{python}
+mm_price = db.group_by(_.date).agg(median_price = _.average_price.median(),mean_price= _.average_price.mean() ).order_by(_.date).to_pandas()
+mm_price
+```
+## Plot the Median and Mean Price
+
+```{python}
+
+sns.lineplot(x='date',y='median_price',data=mm_price,label="Median")
+sns.lineplot(x='date',y='mean_price',data=mm_price,label="Mean")
+plt.grid()
+plt.show()
+```
+## Price by Type i.e. Conventional or Organic
+
+```{python}
+type_price = db.group_by(_.date,_.type).agg(median_price = _.average_price.median(),mean_price= _.average_price.mean() ).order_by(_.date).to_pandas()
+type_price
+```
+```{python}
+sns.lineplot(x='date',y='mean_price',hue='type',data=type_price)
+plt.grid()
+plt.title("Mean Price: Conventional vs Organic")
+plt.show()
+```
+```{python}
+sns.lineplot(x='date',y='median_price',hue='type',data=type_price)
+plt.grid()
+plt.title("Median Price: Conventional vs Organic")
+plt.show()
+```
